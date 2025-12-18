@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
-import { Home, MapPin, Camera, User } from 'lucide-react-native';
+import { Home, MapPin, Camera, User, BookOpen } from 'lucide-react-native';
 
 export const BottomTab = ({ active, onChange }) => {
   const tabs = [
     { id: 'home', icon: Home, label: 'Home' },
     { id: 'map', icon: MapPin, label: 'Map' },
+    { id: 'manual', icon: BookOpen, label: 'Manual' }, // <--- New Tab
     { id: 'report', icon: Camera, label: 'Report' },
     { id: 'profile', icon: User, label: 'Profile' },
   ];
@@ -13,7 +14,7 @@ export const BottomTab = ({ active, onChange }) => {
   return (
     <View 
       className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 pb-8 pt-4 flex-row justify-around shadow-2xl"
-      style={{ zIndex: 50, elevation: 5 }} // <--- FORCES IT ON TOP
+      style={{ zIndex: 50, elevation: 5 }}
     >
       {tabs.map((tab) => {
         const isActive = active === tab.id;

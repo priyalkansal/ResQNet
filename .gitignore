@@ -1,43 +1,44 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+Dependencies
 
-# dependencies
 node_modules/
+.pnp
+.pnp.js
 
-# Expo
-.expo/
+Testing
+
+coverage/
+
+Production
+
+build/
 dist/
-web-build/
-expo-env.d.ts
 
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
+Misc
 
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
 .DS_Store
-*.pem
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# local env files
-.env*.local
+Logs
 
-# typescript
-*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-app-example
+Expo
 
-# generated native folders
-/ios
-/android
+.expo/
+web-build/
+
+Mobile Build
+
+android/
+ios/
+
+SECRET FILES (Add any file with keys here)
+
+src/services/firebaseConfig.js
+src/services/supabaseConfig.js
