@@ -25,11 +25,7 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "experiments": {
-      "baseUrl": "/ResQNet"
-    },
     "plugins": [
-      "expo-router",
       [
         "expo-splash-screen",
         {
