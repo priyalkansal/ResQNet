@@ -2,6 +2,7 @@
   "name": "resqnet",
   "main": "expo/AppEntry.js",
   "version": "1.0.0",
+  "homepage": "https://aayushichhabra.github.io/ResQNet",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
