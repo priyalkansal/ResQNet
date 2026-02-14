@@ -19,9 +19,29 @@ jobs:
         with:
           node-version: 18
 
-      # FIX 1: Use legacy peer deps to solve React 19 vs 18 conflicts
       - name: Install Dependencies
         run: npm install --legacy-peer-deps
+
+      # --- NEW STEP: MANUALLY CREATE CONFIG FILES ON SERVER ---
+      - name: Create Config Files
+        run: |
+          mkdir -p src/services
+          
+          # 1. Create supabaseConfig.js
+          echo "import { createClient } from '@supabase/supabase-js';" > src/services/supabaseConfig.js
+          echo "import AsyncStorage from '@react-native-async-storage/async-storage';" >> src/services/supabaseConfig.js
+          echo "const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;" >> src/services/supabaseConfig.js
+          echo "const SUPABASE_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;" >> src/services/supabaseConfig.js
+          echo "export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: AsyncStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: false } });" >> src/services/supabaseConfig.js
+
+          # 2. Create firebaseConfig.js
+          echo "import { initializeApp, getApps, getApp } from 'firebase/app';" > src/services/firebaseConfig.js
+          echo "import { getAuth, getReactNativePersistence, initializeAuth } from 'firebase/auth';" >> src/services/firebaseConfig.js
+          echo "import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';" >> src/services/firebaseConfig.js
+          echo "const firebaseConfig = { apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY, authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN, projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID, storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET, messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID, appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID };" >> src/services/firebaseConfig.js
+          echo "let app; let auth; if (getApps().length === 0) { app = initializeApp(firebaseConfig); if (typeof window !== 'undefined') { auth = getAuth(app); } else { auth = initializeAuth(app, { persistence: getReactNativePersistence(ReactNativeAsyncStorage) }); } } else { app = getApp(); auth = getAuth(app); } export { app, auth };" >> src/services/firebaseConfig.js
+
+      # --- END OF NEW STEP ---
 
       - name: Generate .env file
         run: |
@@ -37,7 +57,6 @@ jobs:
       - name: Build Website
         run: npx expo export --platform web
 
-      # FIX 2: Create .nojekyll to allow files starting with "_" (like _expo)
       - name: Add .nojekyll file
         run: touch dist/.nojekyll
 
