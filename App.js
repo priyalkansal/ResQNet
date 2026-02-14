@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { View, Alert, TouchableOpacity, Text } from 'react-native';
 import * as QuickActions from 'expo-quick-actions';
-import { useQuickActionRouting } from 'expo-quick-actions/router';
 import * as Location from 'expo-location';
 import { supabase } from './src/services/supabaseConfig';
 import { auth } from './src/services/firebaseConfig';
@@ -21,7 +20,7 @@ export default function App() {
   const [screen, setScreen] = useState('onboarding');
   const [activeTab, setActiveTab] = useState('home');
 
-  // --- 1. REGISTER SHORTCUT ---
+  // --- 1️⃣ REGISTER SHORTCUT ---
   useEffect(() => {
     QuickActions.setItems([
       {
@@ -33,30 +32,31 @@ export default function App() {
     ]);
   }, []);
 
-  // --- 2. HANDLE SHORTCUT ---
-  const activeAction = useQuickActionRouting();
-
+  // --- 2️⃣ HANDLE SHORTCUT (CLASSIC MODE - NO ROUTER) ---
   useEffect(() => {
-    if (activeAction?.id === 'sos_trigger') {
-      handleQuickSOS();
-    }
-  }, [activeAction]);
+    const subscription = QuickActions.addListener((action) => {
+      if (action?.id === 'sos_trigger') {
+        handleQuickSOS();
+      }
+    });
+
+    return () => subscription.remove();
+  }, []);
 
   const handleQuickSOS = async () => {
     console.log("Quick Action Logic Triggered!");
-    
-    // For demo purposes, we allow SOS even if not logged in
-    // This simulates the real Quick Action behavior where the OS handles the trigger
+
     const userEmail = auth.currentUser?.email || 'UNREGISTERED_SOS_USER';
 
     try {
       Alert.alert("🚀 Triggering SOS...", "Fetching location in background...");
-      
+
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert("Error", "Permission denied");
         return;
       }
+
       let loc = await Location.getCurrentPositionAsync({});
 
       const { error } = await supabase.from('reports').insert({
@@ -68,11 +68,14 @@ export default function App() {
       });
 
       if (!error) {
-        Alert.alert("🚨 SOS SENT", "Emergency beacon broadcasted successfully to Rescue Teams.");
-        // If logged in, navigate to dashboard to show confirmation
+        Alert.alert(
+          "🚨 SOS SENT",
+          "Emergency beacon broadcasted successfully to Rescue Teams."
+        );
+
         if (auth.currentUser) {
-            setScreen('app'); 
-            setActiveTab('home');
+          setScreen('app');
+          setActiveTab('home');
         }
       }
     } catch (e) {
@@ -81,18 +84,26 @@ export default function App() {
   };
 
   const renderContent = () => {
-    if (screen === 'onboarding') return <OnboardingScreen onFinish={() => setScreen('login')} />;
-    if (screen === 'login') return <LoginScreen onLogin={() => setScreen('app')} />;
+    if (screen === 'onboarding')
+      return <OnboardingScreen onFinish={() => setScreen('login')} />;
+
+    if (screen === 'login')
+      return <LoginScreen onLogin={() => setScreen('app')} />;
 
     return (
       <View style={{ flex: 1 }}>
         <View style={{ flex: 1 }}>
-          {activeTab === 'home' && <HomeScreen onNavigate={(tab) => setActiveTab(tab)} />}
+          {activeTab === 'home' && (
+            <HomeScreen onNavigate={(tab) => setActiveTab(tab)} />
+          )}
           {activeTab === 'map' && <MapScreen />}
           {activeTab === 'manual' && <ManualScreen />}
           {activeTab === 'report' && <ReportScreen />}
-          {activeTab === 'profile' && <ProfileScreen onLogout={() => setScreen('login')} />}
+          {activeTab === 'profile' && (
+            <ProfileScreen onLogout={() => setScreen('login')} />
+          )}
         </View>
+
         <BottomTab active={activeTab} onChange={setActiveTab} />
       </View>
     );
@@ -103,9 +114,9 @@ export default function App() {
       <View style={{ flex: 1, backgroundColor: 'white', position: 'relative' }}>
         {renderContent()}
 
-        {/* --- VISIBLE PANIC BUTTON (Available on Login Screen) --- */}
+        {/* 🚨 Visible Panic Button on Login Screen */}
         {screen === 'login' && (
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={handleQuickSOS}
             style={{
               position: 'absolute',
